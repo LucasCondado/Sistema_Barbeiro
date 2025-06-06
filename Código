@@ -1,0 +1,61 @@
+import sqlite3
+
+# Criar conexão com o banco de dados
+conn = sqlite3.connect("barbearia.db")
+cursor = conn.cursor()
+
+# Criar tabela de agendamentos
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS agendamentos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nome_cliente TEXT NOT NULL,
+    data_hora TEXT NOT NULL
+)
+""")
+conn.commit()
+
+def agendar_corte():
+    nome = input("Digite o nome do cliente: ")
+    data_hora = input("Digite a data e hora do corte (DD/MM/AAAA HH:MM): ")
+    cursor.execute("INSERT INTO agendamentos (nome_cliente, data_hora) VALUES (?, ?)", (nome, data_hora))
+    conn.commit()
+    print("Agendamento realizado com sucesso!")
+
+def listar_agendamentos():
+    cursor.execute("SELECT * FROM agendamentos")
+    agendamentos = cursor.fetchall()
+    print("\nAgendamentos:")
+    for agendamento in agendamentos:
+        print(f"ID: {agendamento[0]}, Cliente: {agendamento[1]}, Data/Hora: {agendamento[2]}")
+
+def cancelar_agendamento():
+    listar_agendamentos()
+    id_agendamento = input("\nDigite o ID do agendamento a ser cancelado: ")
+    cursor.execute("DELETE FROM agendamentos WHERE id=?", (id_agendamento,))
+    conn.commit()
+    print("Agendamento cancelado com sucesso!")
+
+# Menu de opções
+while True:
+    print("\nSistema de Agendamento - Barbearia")
+    print("1. Agendar corte")
+    print("2. Listar agendamentos")
+    print("3. Cancelar agendamento")
+    print("4. Sair")
+
+    opcao = input("Escolha uma opção: ")
+
+    if opcao == "1":
+        agendar_corte()
+    elif opcao == "2":
+        listar_agendamentos()
+    elif opcao == "3":
+        cancelar_agendamento()
+    elif opcao == "4":
+        print("Saindo do sistema...")
+        break
+    else:
+        print("Opção inválida, tente novamente.")
+
+# Fechar conexão com o banco de dados
+conn.close()
